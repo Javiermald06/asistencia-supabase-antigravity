@@ -239,11 +239,11 @@ AppControlHorario/
 
 | Rol | Responsable | Responsabilidades |
 |-----|-------------|-------------------|
-| **Scrum Master** | [Nombre] | Facilitación de eventos, eliminación de impedimentos |
-| **Product Owner** | [Nombre] | Definición de Sprint Goal, priorización del Backlog |
-| **Developer 1** | [Nombre] | Frontend, diseño UI/UX |
-| **Developer 2** | [Nombre] | Backend, integración Supabase |
-| **Developer 3** | [Nombre] | Testing, debugging, documentación |
+| **Scrum Master** | [Tu Nombre] | Facilitación de eventos, eliminación de impedimentos |
+| **Product Owner** | [Nombre Compañero 1] | Definición de Sprint Goal, priorización del Backlog |
+| **Developer 1** | [Nombre Compañero 2] | Frontend, diseño UI/UX |
+| **Developer 2** | [Nombre Compañero 3] | Backend, integración Supabase |
+| **Developer 3** | [Nombre Compañero 4] | Testing, debugging, documentación |
 
 ### Sprint Goal
 > *"Desarrollar un MVP funcional de Control Horario con autenticación completa, registro de jornadas y persistencia en Supabase."*
