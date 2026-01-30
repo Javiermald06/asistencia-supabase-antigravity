@@ -40,14 +40,14 @@ async function initAuth() {
  */
 async function loadUserProfile(userId) {
     try {
-        const { data, error } = await supabase
+        const { data: userList, error } = await supabase
             .from('usuarios')
             .select('*')
-            .eq('id', userId)
-            .single();
+            .eq('id', userId);
 
         if (error) throw error;
 
+        const data = userList && userList.length > 0 ? userList[0] : null;
         currentUser = data;
         saveToLocalStorage('user_profile', data);
         return data;
@@ -93,7 +93,7 @@ async function register(userData) {
         }
 
         // Create user profile
-        const { data: profileData, error: profileError } = await supabase
+        const { data: profileDataList, error: profileError } = await supabase
             .from('usuarios')
             .insert([{
                 id: authData.user.id,
@@ -102,10 +102,11 @@ async function register(userData) {
                 cargo: cargo || null,
                 rol: 'empleado'
             }])
-            .select()
-            .single();
+            .select();
 
         if (profileError) throw profileError;
+
+        const profileData = profileDataList && profileDataList.length > 0 ? profileDataList[0] : null;
 
         showToast('Cuenta creada exitosamente. Por favor, verifica tu correo electrónico.', 'success');
 
