@@ -1,0 +1,171 @@
+<!-- Register Page Template -->
+<div class="container" style="max-width: 500px; margin-top: 8vh;">
+    <div class="card animate-scale">
+        <div class="text-center mb-6">
+            <h1 class="text-4xl font-bold mb-2">
+                <span
+                    style="background: linear-gradient(135deg, var(--primary-500), var(--secondary-500)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Crear
+                    Cuenta</span>
+            </h1>
+            <p class="text-secondary">Únete al sistema de control horario</p>
+        </div>
+
+        <form id="register-form" class="card-body">
+            <div class="form-group">
+                <label for="register-name" class="form-label">Nombre Completo</label>
+                <input type="text" id="register-name" class="form-input" placeholder="Juan Pérez" required>
+            </div>
+
+            <div class="form-group">
+                <label for="register-email" class="form-label">Correo Electrónico</label>
+                <input type="email" id="register-email" class="form-input" placeholder="tu@email.com" required
+                    autocomplete="email">
+            </div>
+
+            <div class="form-group">
+                <label for="register-cargo" class="form-label">Cargo (Opcional)</label>
+                <input type="text" id="register-cargo" class="form-input" placeholder="Desarrollador, Diseñador, etc.">
+            </div>
+
+            <div class="form-group">
+                <label for="register-password" class="form-label">Contraseña</label>
+                <input type="password" id="register-password" class="form-input" placeholder="••••••••" required
+                    autocomplete="new-password">
+                <div id="password-strength" class="mt-2 hidden">
+                    <div class="flex gap-1 mb-1">
+                        <div class="h-1 flex-1 rounded" id="strength-bar-1"></div>
+                        <div class="h-1 flex-1 rounded" id="strength-bar-2"></div>
+                        <div class="h-1 flex-1 rounded" id="strength-bar-3"></div>
+                        <div class="h-1 flex-1 rounded" id="strength-bar-4"></div>
+                    </div>
+                    <p class="text-xs" id="strength-text"></p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="register-password-confirm" class="form-label">Confirmar Contraseña</label>
+                <input type="password" id="register-password-confirm" class="form-input" placeholder="••••••••" required
+                    autocomplete="new-password">
+            </div>
+
+            <div id="register-error" class="hidden mb-4 p-4"
+                style="background: var(--error-light); border-radius: var(--radius-md); color: var(--error);">
+                <!-- Error message will be inserted here -->
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%;" id="register-btn">
+                <span id="register-btn-text">Crear Cuenta</span>
+                <div class="spinner spinner-sm hidden" id="register-spinner"></div>
+            </button>
+
+            <p class="text-center mt-6 text-sm text-secondary">
+                ¿Ya tienes cuenta?
+                <a href="#/login" class="text-primary-600 font-semibold">Inicia sesión aquí</a>
+            </p>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Register Page Logic
+    (function () {
+        const registerForm = document.getElementById('register-form');
+        const registerBtn = document.getElementById('register-btn');
+        const registerBtnText = document.getElementById('register-btn-text');
+        const registerSpinner = document.getElementById('register-spinner');
+        const registerError = document.getElementById('register-error');
+        const passwordInput = document.getElementById('register-password');
+        const passwordStrength = document.getElementById('password-strength');
+        const strengthText = document.getElementById('strength-text');
+
+        // Password strength indicator
+        passwordInput.addEventListener('input', () => {
+            const password = passwordInput.value;
+
+            if (password.length === 0) {
+                passwordStrength.classList.add('hidden');
+                return;
+            }
+
+            passwordStrength.classList.remove('hidden');
+            const validation = validatePassword(password);
+
+            // Update strength bars
+            const bars = [
+                document.getElementById('strength-bar-1'),
+                document.getElementById('strength-bar-2'),
+                document.getElementById('strength-bar-3'),
+                document.getElementById('strength-bar-4')
+            ];
+
+            bars.forEach((bar, index) => {
+                if (index < validation.score) {
+                    if (validation.strength === 'weak') {
+                        bar.style.background = 'var(--error)';
+                    } else if (validation.strength === 'medium') {
+                        bar.style.background = 'var(--warning)';
+                    } else {
+                        bar.style.background = 'var(--success)';
+                    }
+                } else {
+                    bar.style.background = 'var(--gray-200)';
+                }
+            });
+
+            strengthText.textContent = validation.strength === 'weak' ? 'Débil' :
+                validation.strength === 'medium' ? 'Media' : 'Fuerte';
+            strengthText.style.color = validation.strength === 'weak' ? 'var(--error)' :
+                validation.strength === 'medium' ? 'var(--warning)' : 'var(--success)';
+        });
+
+        // Register form submission
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const cargo = document.getElementById('register-cargo').value;
+            const password = document.getElementById('register-password').value;
+            const passwordConfirm = document.getElementById('register-password-confirm').value;
+
+            // Validate passwords match
+            if (password !== passwordConfirm) {
+                registerError.textContent = 'Las contraseñas no coinciden';
+                registerError.classList.remove('hidden');
+                return;
+            }
+
+            // Show loading state
+            registerBtn.disabled = true;
+            registerBtnText.classList.add('hidden');
+            registerSpinner.classList.remove('hidden');
+            registerError.classList.add('hidden');
+
+            try {
+                const result = await register({
+                    email,
+                    password,
+                    nombre_completo: name,
+                    cargo
+                });
+
+                if (result.success) {
+                    // Redirect to login
+                    setTimeout(() => {
+                        window.location.hash = '#/login';
+                    }, 2000);
+                } else {
+                    registerError.textContent = result.error || 'Error al crear la cuenta';
+                    registerError.classList.remove('hidden');
+                }
+            } catch (error) {
+                registerError.textContent = 'Error al crear la cuenta. Intenta nuevamente.';
+                registerError.classList.remove('hidden');
+            } finally {
+                registerBtn.disabled = false;
+                registerBtnText.classList.remove('hidden');
+                registerSpinner.classList.add('hidden');
+            }
+        });
+    })();
+</script>

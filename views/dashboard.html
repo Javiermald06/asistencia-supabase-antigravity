@@ -1,0 +1,146 @@
+<!-- Dashboard Page Template -->
+<div class="flex" style="min-height: 100vh;">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="nav-brand mb-8">Control Horario</div>
+
+        <nav class="sidebar-nav">
+            <a href="#/dashboard" class="sidebar-item active">
+                <span>📊</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="#/reports" class="sidebar-item">
+                <span>📈</span>
+                <span>Reportes</span>
+            </a>
+            <a href="#/history" class="sidebar-item">
+                <span>📅</span>
+                <span>Historial</span>
+            </a>
+        </nav>
+
+        <div style="position: absolute; bottom: var(--space-6); left: var(--space-6); right: var(--space-6);">
+            <div class="flex items-center gap-3 p-3"
+                style="background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                <div class="flex-1">
+                    <p class="font-semibold text-sm" id="user-name-sidebar">Usuario</p>
+                    <p class="text-xs text-secondary" id="user-role-sidebar">Empleado</p>
+                </div>
+                <button class="btn-icon btn-ghost" id="logout-btn" title="Cerrar sesión">
+                    <span>🚪</span>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main style="margin-left: 260px; flex: 1; padding: var(--space-8);">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold">¡Bienvenido/a, <span id="user-name">Usuario</span>!</h1>
+                <p class="text-secondary mt-1" id="current-date">Cargando...</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <p class="text-sm text-secondary">Hora actual</p>
+                    <p class="text-xl font-semibold" id="current-time">--:--</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Quick Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="stat-card animate-slide-up">
+                <p class="stat-label">Horas de Hoy</p>
+                <p class="stat-value" id="today-hours">0:00</p>
+                <p class="text-sm opacity-90">Tiempo neto trabajado</p>
+            </div>
+
+            <div class="stat-card success animate-slide-up" style="animation-delay: 0.1s;">
+                <p class="stat-label">Tiempo en Pausas</p>
+                <p class="stat-value" id="break-time">0:00</p>
+                <p class="text-sm opacity-90">Pausas acumuladas</p>
+            </div>
+
+            <div class="stat-card secondary animate-slide-up" style="animation-delay: 0.2s;">
+                <p class="stat-label">Horas Semanales</p>
+                <p class="stat-value" id="week-hours">0h</p>
+                <p class="text-sm opacity-90">Total esta semana</p>
+            </div>
+        </div>
+
+        <!-- Time Control Panel -->
+        <div class="card mb-8">
+            <div class="card-header">
+                <h2 class="card-title">Panel de Control</h2>
+                <p class="card-subtitle">Gestiona tu jornada laboral</p>
+            </div>
+            <div class="card-body">
+                <div class="text-center p-8">
+                    <!-- Timer Display -->
+                    <div class="mb-6">
+                        <p class="text-sm text-secondary mb-2">Tiempo transcurrido</p>
+                        <p class="text-6xl font-bold" id="timer-display" style="font-variant-numeric: tabular-nums;">
+                            00:00:00</p>
+                        <div class="mt-3">
+                            <span id="work-status" class="badge badge-info">Sin iniciar</span>
+                        </div>
+                    </div>
+
+                    <!-- Control Buttons -->
+                    <div id="clock-in-section" class="flex gap-4 justify-center">
+                        <button class="btn btn-success btn-lg" id="clock-in-btn">
+                            <span>⏱️</span>
+                            <span>Iniciar Jornada</span>
+                        </button>
+                    </div>
+
+                    <div id="clock-out-section" class="hidden">
+                        <div class="flex gap-4 justify-center mb-4">
+                            <button class="btn btn-warning" id="start-pause-btn">
+                                <span>⏸️</span>
+                                <span>Iniciar Pausa</span>
+                            </button>
+                            <button class="btn btn-info hidden" id="end-pause-btn">
+                                <span>▶️</span>
+                                <span>Finalizar Pausa</span>
+                            </button>
+                            <button class="btn btn-danger" id="clock-out-btn">
+                                <span>⏹️</span>
+                                <span>Finalizar Jornada</span>
+                            </button>
+                        </div>
+
+                        <!-- Pause Type Selection -->
+                        <div id="pause-type-selector" class="hidden mt-4 p-4"
+                            style="background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                            <p class="text-sm font-semibold mb-2">Tipo de pausa:</p>
+                            <div class="flex gap-2 justify-center">
+                                <button class="btn btn-sm btn-outline pause-type-btn"
+                                    data-type="descanso">Descanso</button>
+                                <button class="btn btn-sm btn-outline pause-type-btn" data-type="comida">Comida</button>
+                                <button class="btn btn-sm btn-outline pause-type-btn"
+                                    data-type="personal">Personal</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Activity -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Actividad de Hoy</h2>
+            </div>
+            <div class="card-body">
+                <div id="today-activity">
+                    <p class="text-center text-secondary py-8">No hay actividad registrada hoy</p>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="../js/dashboard.js"></script>

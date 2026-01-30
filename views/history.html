@@ -1,0 +1,334 @@
+<!-- History Page Template -->
+<div class="flex" style="min-height: 100vh;">
+    <!-- Sidebar (same as dashboard) -->
+    <aside class="sidebar">
+        <div class="nav-brand mb-8">Control Horario</div>
+
+        <nav class="sidebar-nav">
+            <a href="#/dashboard" class="sidebar-item">
+                <span>📊</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="#/reports" class="sidebar-item">
+                <span>📈</span>
+                <span>Reportes</span>
+            </a>
+            <a href="#/history" class="sidebar-item active">
+                <span>📅</span>
+                <span>Historial</span>
+            </a>
+        </nav>
+
+        <div style="position: absolute; bottom: var(--space-6); left: var(--space-6); right: var(--space-6);">
+            <div class="flex items-center gap-3 p-3"
+                style="background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                <div class="flex-1">
+                    <p class="font-semibold text-sm" id="user-name-sidebar">Usuario</p>
+                    <p class="text-xs text-secondary" id="user-role-sidebar">Empleado</p>
+                </div>
+                <button class="btn-icon btn-ghost" id="logout-btn-history" title="Cerrar sesión">
+                    <span>🚪</span>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main style="margin-left: 260px; flex: 1; padding: var(--space-8);">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold mb-2">Historial de Jornadas</h1>
+            <p class="text-secondary">Consulta y gestiona tus registros históricos</p>
+        </header>
+
+        <!-- Filters -->
+        <div class="card mb-6">
+            <div class="card-body">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="form-group m-0">
+                        <label class="form-label">Fecha Inicio</label>
+                        <input type="date" id="filter-start-date" class="form-input">
+                    </div>
+                    <div class="form-group m-0">
+                        <label class="form-label">Fecha Fin</label>
+                        <input type="date" id="filter-end-date" class="form-input">
+                    </div>
+                    <div class="form-group m-0">
+                        <label class="form-label">Estado</label>
+                        <select id="filter-estado" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="completada">Completada</option>
+                            <option value="activa">Activa</option>
+                            <option value="incompleta">Incompleta</option>
+                        </select>
+                    </div>
+                    <div class="form-group m-0 flex items-end">
+                        <button class="btn btn-primary" id="apply-filters-btn" style="width: 100%;">Aplicar
+                            Filtros</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Table -->
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Entrada</th>
+                                <th>Salida</th>
+                                <th>Tiempo Neto</th>
+                                <th>Pausas</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body">
+                            <tr>
+                                <td colspan="7" class="text-center text-secondary py-8">
+                                    <div class="spinner m-auto mb-4"></div>
+                                    <p>Cargando historial...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="card-footer flex justify-between items-center">
+                <p class="text-sm text-secondary" id="pagination-info">Mostrando 0 de 0 registros</p>
+                <div class="pagination" id="pagination-controls"></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Initialize history page
+    (async function () {
+        let currentPage = 1;
+        let currentFilters = {};
+
+        const user = getCurrentUser();
+        if (user) {
+            document.getElementById('user-name-sidebar').textContent = user.nombre_completo;
+            document.getElementById('user-role-sidebar').textContent = user.rol.charAt(0).toUpperCase() + user.rol.slice(1);
+        }
+
+        // Set up logout
+        document.getElementById('logout-btn-history').addEventListener('click', async () => {
+            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                await logout();
+                window.location.hash = '#/login';
+            }
+        });
+
+        // Set default date range (last 30 days)
+        const today = new Date();
+        const thirtyDaysAgo = new Date(today);
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+
+        document.getElementById('filter-end-date').valueAsDate = today;
+        document.getElementById('filter-start-date').valueAsDate = thirtyDaysAgo;
+
+        // Load initial data
+        await loadHistory();
+
+        // Apply filters button
+        document.getElementById('apply-filters-btn').addEventListener('click', async () => {
+            currentPage = 1;
+            await loadHistory();
+        });
+
+        async function loadHistory() {
+            const startDate = document.getElementById('filter-start-date').value;
+            const endDate = document.getElementById('filter-end-date').value;
+            const estado = document.getElementById('filter-estado').value;
+
+            currentFilters = {
+                startDate: startDate || null,
+                endDate: endDate || null,
+                estado: estado || null,
+                page: currentPage
+            };
+
+            try {
+                const result = await getJornadasHistory(currentFilters);
+                displayHistory(result);
+            } catch (error) {
+                document.getElementById('history-table-body').innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center text-error py-8">
+                        Error al cargar el historial
+                    </td>
+                </tr>
+            `;
+            }
+        }
+
+        function displayHistory(result) {
+            const tbody = document.getElementById('history-table-body');
+
+            if (!result.data || result.data.length === 0) {
+                tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center text-secondary py-8">
+                        No se encontraron registros
+                    </td>
+                </tr>
+            `;
+                return;
+            }
+
+            tbody.innerHTML = result.data.map(jornada => {
+                const pausasCount = jornada.pausas.length;
+                const estadoBadge = jornada.estado === 'completada' ? 'badge-success' :
+                    jornada.estado === 'activa' ? 'badge-info' : 'badge-warning';
+
+                return `
+                <tr>
+                    <td>${formatDate(jornada.fecha)}</td>
+                    <td>${formatTime(jornada.hora_entrada)}</td>
+                    <td>${jornada.hora_salida ? formatTime(jornada.hora_salida) : '-'}</td>
+                    <td>${jornada.tiempo_neto_segundos ? formatDurationHuman(jornada.tiempo_neto_segundos) : '-'}</td>
+                    <td>${pausasCount}</td>
+                    <td><span class="badge ${estadoBadge}">${jornada.estado}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-ghost view-details-btn" data-id="${jornada.id}">
+                            👁️ Ver
+                        </button>
+                    </td>
+                </tr>
+            `;
+            }).join('');
+
+            // Set up view details buttons
+            document.querySelectorAll('.view-details-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.closest('.view-details-btn').dataset.id;
+                    const jornada = result.data.find(j => j.id === id);
+                    showDetailsModal(jornada);
+                });
+            });
+
+            // Update pagination
+            updatePagination(result.pagination);
+        }
+
+        function updatePagination(pagination) {
+            const info = document.getElementById('pagination-info');
+            const controls = document.getElementById('pagination-controls');
+
+            const from = (pagination.page - 1) * pagination.pageSize + 1;
+            const to = Math.min(pagination.page * pagination.pageSize, pagination.total);
+
+            info.textContent = `Mostrando ${from} - ${to} de ${pagination.total} registros`;
+
+            // Create pagination buttons
+            controls.innerHTML = '';
+
+            // Previous button
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'pagination-btn';
+            prevBtn.textContent = '← Anterior';
+            prevBtn.disabled = pagination.page === 1;
+            prevBtn.addEventListener('click', () => {
+                currentPage--;
+                loadHistory();
+            });
+            controls.appendChild(prevBtn);
+
+            // Page numbers
+            for (let i = 1; i <= pagination.totalPages; i++) {
+                if (i === 1 || i === pagination.totalPages || (i >= pagination.page - 1 && i <= pagination.page + 1)) {
+                    const pageBtn = document.createElement('button');
+                    pageBtn.className = `pagination-btn ${i === pagination.page ? 'active' : ''}`;
+                    pageBtn.textContent = i;
+                    pageBtn.addEventListener('click', () => {
+                        currentPage = i;
+                        loadHistory();
+                    });
+                    controls.appendChild(pageBtn);
+                } else if (i === pagination.page - 2 || i === pagination.page + 2) {
+                    const dots = document.createElement('span');
+                    dots.className = 'pagination-btn';
+                    dots.textContent = '...';
+                    dots.disabled = true;
+                    controls.appendChild(dots);
+                }
+            }
+
+            // Next button
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'pagination-btn';
+            nextBtn.textContent = 'Siguiente →';
+            nextBtn.disabled = pagination.page === pagination.totalPages;
+            nextBtn.addEventListener('click', () => {
+                currentPage++;
+                loadHistory();
+            });
+            controls.appendChild(nextBtn);
+        }
+
+        function showDetailsModal(jornada) {
+            const modal = `
+            <div class="modal-overlay" id="details-modal">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Detalles de Jornada</h3>
+                        <button class="btn-icon btn-ghost" id="close-details-modal">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-4">
+                            <p class="text-sm text-secondary">Fecha</p>
+                            <p class="font-semibold">${formatDate(jornada.fecha)}</p>
+                        </div>
+                        <div class="mb-4">
+                            <p class="text-sm text-secondary">Horario</p>
+                            <p class="font-semibold">${formatTime(jornada.hora_entrada)} - ${jornada.hora_salida ? formatTime(jornada.hora_salida) : 'En progreso'}</p>
+                        </div>
+                        <div class="mb-4">
+                            <p class="text-sm text-secondary">Tiempo Neto</p>
+                            <p class="font-semibold">${jornada.tiempo_neto_segundos ? formatDurationHuman(jornada.tiempo_neto_segundos) : '-'}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-secondary mb-2">Pausas (${jornada.pausas.length})</p>
+                            ${jornada.pausas.map(pausa => `
+                                <div class="p-3 mb-2" style="background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                                    <div class="flex justify-between">
+                                        <span class="badge badge-secondary">${pausa.tipo}</span>
+                                        <span>${pausa.duracion_segundos ? formatDurationHuman(pausa.duracion_segundos) : '-'}</span>
+                                    </div>
+                                    <p class="text-xs text-secondary mt-1">${formatTime(pausa.hora_inicio)} - ${pausa.hora_fin ? formatTime(pausa.hora_fin) : 'Activa'}</p>
+                                </div>
+                            `).join('') || '<p class="text-secondary text-sm">Sin pausas</p>'}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" id="close-modal-btn">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+            document.body.insertAdjacentHTML('beforeend', modal);
+
+            const modalElement = document.getElementById('details-modal');
+            const closeBtn = document.getElementById('close-details-modal');
+            const closeBtnFooter = document.getElementById('close-modal-btn');
+
+            const closeModal = () => modalElement.remove();
+
+            closeBtn.addEventListener('click', closeModal);
+            closeBtnFooter.addEventListener('click', closeModal);
+            modalElement.addEventListener('click', (e) => {
+                if (e.target === modalElement) closeModal();
+            });
+        }
+    })();
+</script>

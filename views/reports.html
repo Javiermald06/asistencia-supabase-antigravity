@@ -1,0 +1,325 @@
+<!-- Reports Page Template -->
+<div class="flex" style="min-height: 100vh;">
+    <!-- Sidebar (same as dashboard) -->
+    <aside class="sidebar">
+        <div class="nav-brand mb-8">Control Horario</div>
+
+        <nav class="sidebar-nav">
+            <a href="#/dashboard" class="sidebar-item">
+                <span>📊</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="#/reports" class="sidebar-item active">
+                <span>📈</span>
+                <span>Reportes</span>
+            </a>
+            <a href="#/history" class="sidebar-item">
+                <span>📅</span>
+                <span>Historial</span>
+            </a>
+        </nav>
+
+        <div style="position: absolute; bottom: var(--space-6); left: var(--space-6); right: var(--space-6);">
+            <div class="flex items-center gap-3 p-3"
+                style="background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                <div class="flex-1">
+                    <p class="font-semibold text-sm" id="user-name-sidebar">Usuario</p>
+                    <p class="text-xs text-secondary" id="user-role-sidebar">Empleado</p>
+                </div>
+                <button class="btn-icon btn-ghost" id="logout-btn-reports" title="Cerrar sesión">
+                    <span>🚪</span>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main style="margin-left: 260px; flex: 1; padding: var(--space-8);">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold mb-2">Reportes y Estadísticas</h1>
+            <p class="text-secondary">Analiza tu tiempo de trabajo</p>
+        </header>
+
+        <!-- Report Type Selector -->
+        <div class="card mb-8">
+            <div class="card-body" style=" padding: var(--space-4);">
+                <div class="flex gap-3">
+                    <button class="btn btn-primary" id="daily-report-btn">Diario</button>
+                    <button class="btn btn-secondary" id="weekly-report-btn">Semanal</button>
+                    <button class="btn btn-secondary" id="monthly-report-btn">Mensual</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Report -->
+        <div id="daily-report-section" class="hidden">
+            <div class="card mb-6">
+                <div class="card-header flex justify-between items-center">
+                    <div>
+                        <h2 class="card-title">Reporte Diario</h2>
+                        <p class="card-subtitle" id="daily-date">Selecciona una fecha</p>
+                    </div>
+                    <input type="date" id="daily-date-picker" class="form-input" style="width: auto;">
+                </div>
+                <div class="card-body">
+                    <div id="daily-report-content">
+                        <p class="text-center text-secondary py-8">Cargando...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Report -->
+        <div id="weekly-report-section" class="hidden">
+            <div class="card mb-6">
+                <div class="card-header">
+                    <h2 class="card-title">Reporte Semanal</h2>
+                    <p class="card-subtitle" id="weekly-period">Semana actual</p>
+                </div>
+                <div class="card-body">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="p-4" style="background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                            <p class="text-sm text-secondary">Total Trabajado</p>
+                            <p class="text-2xl font-bold" id="weekly-total">0h</p>
+                        </div>
+                        <div class="p-4" style="background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                            <p class="text-sm text-secondary">Días Trabajados</p>
+                            <p class="text-2xl font-bold" id="weekly-days">0</p>
+                        </div>
+                        <div class="p-4" style="background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                            <p class="text-sm text-secondary">Promedio Diario</p>
+                            <p class="text-2xl font-bold" id="weekly-average">0h</p>
+                        </div>
+                    </div>
+                    <div id="weekly-chart-container" style="height: 300px;">
+                        <!-- Chart will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Report -->
+        <div id="monthly-report-section" class="hidden">
+            <div class="card mb-6">
+                <div class="card-header flex justify-between items-center">
+                    <div>
+                        <h2 class="card-title">Reporte Mensual</h2>
+                        <p class="card-subtitle" id="monthly-period">Mes actual</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="month-selector" class="form-select" style="width: auto;">
+                            <option value="1">Enero</option>
+                            <option value="2">Febrero</option>
+                            <option value="3">Marzo</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Mayo</option>
+                            <option value="6">Junio</option>
+                            <option value="7">Julio</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Septiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
+                        </select>
+                        <input type="number" id="year-selector" class="form-input" style="width: 100px;" min="2020"
+                            max="2030">
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="p-4" style="background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                            <p class="text-sm text-secondary">Total Trabajado</p>
+                            <p class="text-2xl font-bold" id="monthly-total">0h</p>
+                        </div>
+                        <div class="p-4" style="background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                            <p class="text-sm text-secondary">Días Trabajados</p>
+                            <p class="text-2xl font-bold" id="monthly-days">0</p>
+                        </div>
+                        <div class="p-4" style="background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                            <p class="text-sm text-secondary">Horas Extra</p>
+                            <p class="text-2xl font-bold" id="monthly-overtime">0h</p>
+                        </div>
+                        <div class="p-4" style="background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                            <p class="text-sm text-secondary">Promedio Diario</p>
+                            <p class="text-2xl font-bold" id="monthly-average">0h</p>
+                        </div>
+                    </div>
+                    <div id="monthly-chart-container" style="height: 300px;">
+                        <!-- Chart will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Initialize reports page
+    (async function () {
+        const user = getCurrentUser();
+        if (user) {
+            document.getElementById('user-name-sidebar').textContent = user.nombre_completo;
+            document.getElementById('user-role-sidebar').textContent = user.rol.charAt(0).toUpperCase() + user.rol.slice(1);
+        }
+
+        // Set up logout
+        document.getElementById('logout-btn-reports').addEventListener('click', async () => {
+            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                await logout();
+                window.location.hash = '#/login';
+            }
+        });
+
+        // Set up report type buttons
+        const dailyBtn = document.getElementById('daily-report-btn');
+        const weeklyBtn = document.getElementById('weekly-report-btn');
+        const monthlyBtn = document.getElementById('monthly-report-btn');
+
+        const dailySection = document.getElementById('daily-report-section');
+        const weeklySection = document.getElementById('weekly-report-section');
+        const monthlySection = document.getElementById('monthly-report-section');
+
+        dailyBtn.addEventListener('click', () => {
+            dailyBtn.classList.replace('btn-secondary', 'btn-primary');
+            weeklyBtn.classList.replace('btn-primary', 'btn-secondary');
+            monthlyBtn.classList.replace('btn-primary', 'btn-secondary');
+
+            dailySection.classList.remove('hidden');
+            weeklySection.classList.add('hidden');
+            monthlySection.classList.add('hidden');
+
+            loadDailyReport();
+        });
+
+        weeklyBtn.addEventListener('click', () => {
+            dailyBtn.classList.replace('btn-primary', 'btn-secondary');
+            weeklyBtn.classList.replace('btn-secondary', 'btn-primary');
+            monthlyBtn.classList.replace('btn-primary', 'btn-secondary');
+
+            dailySection.classList.add('hidden');
+            weeklySection.classList.remove('hidden');
+            monthlySection.classList.add('hidden');
+
+            loadWeeklyReport();
+        });
+
+        monthlyBtn.addEventListener('click', () => {
+            dailyBtn.classList.replace('btn-primary', 'btn-secondary');
+            weeklyBtn.classList.replace('btn-primary', 'btn-secondary');
+            monthlyBtn.classList.replace('btn-secondary', 'btn-primary');
+
+            dailySection.classList.add('hidden');
+            weeklySection.classList.add('hidden');
+            monthlySection.classList.remove('hidden');
+
+            loadMonthlyReport();
+        });
+
+        // Load default (weekly) report
+        weeklyBtn.click();
+
+        // Set up date pickers
+        const today = new Date();
+        document.getElementById('daily-date-picker').valueAsDate = today;
+        document.getElementById('month-selector').value = today.getMonth() + 1;
+        document.getElementById('year-selector').value = today.getFullYear();
+
+        // Daily date picker change
+        document.getElementById('daily-date-picker').addEventListener('change', loadDailyReport);
+
+        // Monthly selectors change
+        document.getElementById('month-selector').addEventListener('change', loadMonthlyReport);
+        document.getElementById('year-selector').addEventListener('change', loadMonthlyReport);
+
+        async function loadDailyReport() {
+            try {
+                const dateInput = document.getElementById('daily-date-picker');
+                const date = dateInput.valueAsDate || new Date();
+
+                const report = await getDailyReport(date);
+                const content = document.getElementById('daily-report-content');
+
+                if (!report.trabajado) {
+                    content.innerHTML = '<p class="text-center text-secondary py-8">No hay registros para este día</p>';
+                    return;
+                }
+
+                content.innerHTML = `
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-semibold mb-4">Resumen</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-secondary">Entrada:</span>
+                            <span class="font-semibold">${formatTime(report.horaEntrada)}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-secondary">Salida:</span>
+                            <span class="font-semibold">${report.horaSalida ? formatTime(report.horaSalida) : 'En progreso'}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-secondary">Tiempo Total:</span>
+                            <span class="font-semibold">${formatDurationHuman(report.totalTime)}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-secondary">Pausas:</span>
+                            <span class="font-semibold">${formatDurationHuman(report.breakTime)}</span>
+                        </div>
+                        <div class="flex justify-between border-t pt-3">
+                            <span class="text-secondary font-bold">Tiempo Neto:</span>
+                            <span class="font-bold text-xl text-primary-600">${formatDurationHuman(report.netTime)}</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-4">Pausas (${report.pausas.length})</h3>
+                    ${report.pausas.length > 0 ? report.pausas.map(pausa => `
+                        <div class="p-3 mb-2" style="background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                            <div class="flex justify-between items-center">
+                                <span class="badge badge-${pausa.tipo === 'comida' ? 'warning' : pausa.tipo === 'personal' ? 'info' : 'secondary'}">${pausa.tipo}</span>
+                                <span class="text-sm">${pausa.duracion_segundos ? formatDurationHuman(pausa.duracion_segundos) : 'En progreso'}</span>
+                            </div>
+                            <p class="text-xs text-secondary mt-1">${formatTime(pausa.hora_inicio)} - ${pausa.hora_fin ? formatTime(pausa.hora_fin) : 'Activa'}</p>
+                        </div>
+                    `).join('') : '<p class="text-secondary text-sm">Sin pausas registradas</p>'}
+                </div>
+            </div>
+        `;
+            } catch (error) {
+                console.error('Error loading daily report:', error);
+                const content = document.getElementById('daily-report-content');
+                content.innerHTML = '<p class="text-center text-danger py-8">Error al cargar el reporte. Por favor intenta de nuevo.</p>';
+            }
+        }
+
+        async function loadWeeklyReport() {
+            try {
+                const report = await getWeeklyReport();
+
+                document.getElementById('weekly-total').textContent = Math.floor(report.totalNetTime / 3600) + 'h';
+                document.getElementById('weekly-days').textContent = report.daysWorked;
+                document.getElementById('weekly-average').textContent = Math.floor(report.averageDaily / 3600) + 'h';
+            } catch (error) {
+                console.error('Error loading weekly report:', error);
+                showToast('Error al cargar el reporte semanal', 'error');
+            }
+        }
+
+        async function loadMonthlyReport() {
+            try {
+                const month = parseInt(document.getElementById('month-selector').value);
+                const year = parseInt(document.getElementById('year-selector').value);
+
+                const report = await getMonthlyReport(month, year);
+
+                document.getElementById('monthly-total').textContent = Math.floor(report.totalNetTime / 3600) + 'h';
+                document.getElementById('monthly-days').textContent = report.daysWorked;
+                document.getElementById('monthly-overtime').textContent = Math.floor(report.totalOvertimeTime / 3600) + 'h';
+                document.getElementById('monthly-average').textContent = Math.floor(report.averageDaily / 3600) + 'h';
+            } catch (error) {
+                console.error('Error loading monthly report:', error);
+                showToast('Error al cargar el reporte mensual', 'error');
+            }
+        }
+    })();
+</script>

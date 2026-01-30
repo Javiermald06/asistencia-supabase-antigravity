@@ -1,0 +1,165 @@
+<!-- Login Page Template -->
+<div class="container" style="max-width: 450px; margin-top: 10vh;">
+    <div class="card animate-scale">
+        <div class="text-center mb-6">
+            <h1 class="text-4xl font-bold mb-2">
+                <span
+                    style="background: linear-gradient(135deg, var(--primary-500), var(--secondary-500)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Control
+                    Horario</span>
+            </h1>
+            <p class="text-secondary">Inicia sesión para gestionar tu tiempo</p>
+        </div>
+
+        <form id="login-form" class="card-body">
+            <div class="form-group">
+                <label for="login-email" class="form-label">Correo Electrónico</label>
+                <input type="email" id="login-email" class="form-input" placeholder="tu@email.com" required
+                    autocomplete="email">
+            </div>
+
+            <div class="form-group">
+                <label for="login-password" class="form-label">Contraseña</label>
+                <input type="password" id="login-password" class="form-input" placeholder="••••••••" required
+                    autocomplete="current-password">
+            </div>
+
+            <div class="flex justify-between items-center mb-6">
+                <label class="flex items-center gap-2 text-sm">
+                    <input type="checkbox" class="form-checkbox" id="remember-me">
+                    <span class="text-secondary">Recordarme</span>
+                </label>
+                <a href="#" id="forgot-password-link" class="text-sm text-primary-600">¿Olvidaste tu contraseña?</a>
+            </div>
+
+            <div id="login-error" class="hidden mb-4 p-4"
+                style="background: var(--error-light); border-radius: var(--radius-md); color: var(--error);">
+                <!-- Error message will be inserted here -->
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%;" id="login-btn">
+                <span id="login-btn-text">Iniciar Sesión</span>
+                <div class="spinner spinner-sm hidden" id="login-spinner"></div>
+            </button>
+
+            <p class="text-center mt-6 text-sm text-secondary">
+                ¿No tienes cuenta?
+                <a href="#/register" class="text-primary-600 font-semibold">Regístrate aquí</a>
+            </p>
+        </form>
+    </div>
+
+    <!-- Password Recovery Modal - MUST start hidden -->
+    <div id="password-recovery-modal" class="modal-overlay" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Recuperar Contraseña</h3>
+                <button class="btn-icon btn-ghost" id="close-recovery-modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="text-secondary mb-4">Ingresa tu correo electrónico y te enviaremos un enlace para restablecer
+                    tu contraseña.</p>
+                <form id="recovery-form">
+                    <div class="form-group">
+                        <label for="recovery-email" class="form-label">Correo Electrónico</label>
+                        <input type="email" id="recovery-email" class="form-input" placeholder="tu@email.com" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-recovery">Cancelar</button>
+                <button class="btn btn-primary" id="send-recovery">Enviar Enlace</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Login Page Logic
+    (function () {
+        const loginForm = document.getElementById('login-form');
+        const loginBtn = document.getElementById('login-btn');
+        const loginBtnText = document.getElementById('login-btn-text');
+        const loginSpinner = document.getElementById('login-spinner');
+        const loginError = document.getElementById('login-error');
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
+        const recoveryModal = document.getElementById('password-recovery-modal');
+        const closeRecoveryBtn = document.getElementById('close-recovery-modal');
+        const cancelRecoveryBtn = document.getElementById('cancel-recovery');
+        const sendRecoveryBtn = document.getElementById('send-recovery');
+
+        // Login form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            // Show loading state
+            loginBtn.disabled = true;
+            loginBtnText.classList.add('hidden');
+            loginSpinner.classList.remove('hidden');
+            loginError.classList.add('hidden');
+
+            try {
+                const result = await login(email, password);
+
+                if (result.success) {
+                    // Redirect to dashboard
+                    window.location.hash = '#/dashboard';
+                } else {
+                    // Show error
+                    loginError.textContent = result.error || 'Error al iniciar sesión';
+                    loginError.classList.remove('hidden');
+                }
+            } catch (error) {
+                loginError.textContent = 'Error al iniciar sesión. Intenta nuevamente.';
+                loginError.classList.remove('hidden');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtnText.classList.remove('hidden');
+                loginSpinner.classList.add('hidden');
+            }
+        });
+
+        // Password recovery modal handlers
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            recoveryModal.style.display = 'flex';
+        });
+
+        closeRecoveryBtn.addEventListener('click', () => {
+            recoveryModal.style.display = 'none';
+        });
+
+        cancelRecoveryBtn.addEventListener('click', () => {
+            recoveryModal.style.display = 'none';
+        });
+
+        sendRecoveryBtn.addEventListener('click', async () => {
+            const email = document.getElementById('recovery-email').value;
+
+            if (!email) {
+                showToast('Ingresa tu correo electrónico', 'error');
+                return;
+            }
+
+            sendRecoveryBtn.disabled = true;
+            const success = await requestPasswordReset(email);
+            sendRecoveryBtn.disabled = false;
+
+            if (success) {
+                recoveryModal.style.display = 'none';
+                document.getElementById('recovery-email').value = '';
+            }
+        });
+
+        // Close modal on overlay click
+        recoveryModal.addEventListener('click', (e) => {
+            if (e.target === recoveryModal) {
+                recoveryModal.style.display = 'none';
+            }
+        });
+    })();
+</script>
