@@ -1,3 +1,15 @@
+/**
+ * @fileoverview Configuración global y constantes de la aplicación
+ * @project Sistema de Control Horario
+ * @version 1.0.0
+ * @author Equipo Scrum
+ * 
+ * Contiene:
+ * - Credenciales de Supabase
+ * - Configuraciones de la aplicación
+ * - Rutas del router SPA
+ */
+
 // Supabase Configuration
 const SUPABASE_URL = 'https://dgqlblfwrqkdephpripi.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRncWxibGZ3cnFrZGVwaHByaXBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3ODM3MjYsImV4cCI6MjA4NTM1OTcyNn0.IN77z4lJ98bFsBjUD1AUVpF45NNVJu1mYNbSEImvsFc';
